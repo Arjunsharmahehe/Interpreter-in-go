@@ -24,7 +24,6 @@ const (
 	SLASH    = "/"
 
 	// Comparison operators
-	EQ = "=="
 	LT = "<"
 	GT = ">"
 

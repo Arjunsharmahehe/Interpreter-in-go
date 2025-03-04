@@ -3,18 +3,20 @@ package lexer
 import "interpreter/token"
 
 type Lexer struct {
-	input        string
-	position     int
-	readPosition int
-	ch           byte
+	input        string // the input to the lexer
+	position     int    // current position in input (points to current char)
+	readPosition int    // current reading position in input (after current char)
+	ch           byte   // current char under examination
 }
 
+// inits the lexer with the input
 func New(input string) *Lexer {
 	l := &Lexer{input: input}
 	l.readChar()
 	return l
 }
 
+// reads the next character in the input and advances the position in the input string
 func (l *Lexer) readChar() {
 	if l.readPosition >= len(l.input) {
 		l.ch = 0
@@ -25,6 +27,7 @@ func (l *Lexer) readChar() {
 	l.readPosition += 1
 }
 
+// returns the next TOKEN from the input
 func (l *Lexer) NextToken() token.Token {
 	var tok token.Token
 
@@ -32,6 +35,7 @@ func (l *Lexer) NextToken() token.Token {
 
 	switch l.ch {
 	case '=':
+		// if the next character is an '=', then it is an EQ token
 		if l.peekChar() == '=' {
 			ch := l.ch
 			l.readChar()
@@ -44,6 +48,7 @@ func (l *Lexer) NextToken() token.Token {
 	case '-':
 		tok = newToken(token.MINUS, l.ch)
 	case '!':
+		// if the next character is an '=', then it is a NOT_EQ token
 		if l.peekChar() == '=' {
 			ch := l.ch
 			l.readChar()
@@ -75,10 +80,12 @@ func (l *Lexer) NextToken() token.Token {
 		tok.Literal = ""
 		tok.Type = token.EOF
 	default:
+		// checks if the word is a keywords or identifiers
 		if isLetter(l.ch) {
 			tok.Literal = l.readIdentifier()
 			tok.Type = token.LookupIdent(tok.Literal)
 			return tok
+			// checks if the word is a number
 		} else if isDigit(l.ch) {
 			tok.Type = token.INT
 			tok.Literal = l.readNumber()
@@ -91,10 +98,12 @@ func (l *Lexer) NextToken() token.Token {
 	return tok
 }
 
+// creates a new token with the given Type and Literal
 func newToken(tokenType token.TokenType, ch byte) token.Token {
 	return token.Token{Type: tokenType, Literal: string(ch)}
 }
 
+// returns the entier word from the input
 func (l *Lexer) readIdentifier() string {
 	position := l.position
 	for isLetter(l.ch) {
@@ -104,6 +113,7 @@ func (l *Lexer) readIdentifier() string {
 	return l.input[position:l.position]
 }
 
+// returns the entire number from the input
 func (l *Lexer) readNumber() string {
 	position := l.position
 	for isDigit(l.ch) {
@@ -113,20 +123,24 @@ func (l *Lexer) readNumber() string {
 	return l.input[position:l.position]
 }
 
+// checks if the given character is a letter
 func isLetter(ch byte) bool {
 	return 'a' <= ch && ch <= 'z' || 'A' <= ch && ch <= 'Z' || ch == '_'
 }
 
+// checks if the given character is a digit
 func isDigit(ch byte) bool {
 	return '0' <= ch && ch <= '9'
 }
 
+// skips the whitespaces, newline characters, etc.
 func (l *Lexer) skipWhitespace() {
 	for l.ch == ' ' || l.ch == '\t' || l.ch == '\n' || l.ch == '\r' {
 		l.readChar()
 	}
 }
 
+// returns the next character in the input without advancing the position
 func (l *Lexer) peekChar() byte {
 	if l.readPosition >= len(l.input) {
 		return 0

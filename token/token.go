@@ -48,6 +48,7 @@ const (
 	RETURN   = "RETURN"
 )
 
+// map of keywords to their respective token types making the lookup easier
 var keywords = map[string]TokenType{
 	"fn":     FUNCTION,
 	"let":    LET,
@@ -58,6 +59,7 @@ var keywords = map[string]TokenType{
 	"return": RETURN,
 }
 
+// returns the token type: IDENT or the keyword token type
 func LookupIdent(ident string) TokenType {
 	if tok, ok := keywords[ident]; ok {
 		return tok
